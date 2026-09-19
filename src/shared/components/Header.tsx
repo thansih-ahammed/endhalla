@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
 import { px } from '../utils/responsive';
-import { colors, fonts, borderRadius } from '../../client/theme';
+import { colors, fonts, borderRadius } from '../theme';
 import BackIcon from '../assets/icons/back-icon.svg';
 
 interface HeaderProps {

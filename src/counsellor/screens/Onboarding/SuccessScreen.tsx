@@ -26,7 +26,7 @@ export default function SuccessScreen({ navigation }: any) {
   // Auth session was already established for real at OTP verification —
   // this screen just finishes the local onboarding UI and moves on.
   const handleFinishOnboarding = () => {
-    navigation.navigate('CounsellorDashboard');
+    navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
   };
 
   return (

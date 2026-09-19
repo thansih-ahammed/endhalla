@@ -1,5 +1,46 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { getCounsellorBaseUrl } from '../../utils/config';
+import { BookingRecord } from '../../utils/bookings';
+
+export interface CounsellorProfile {
+  _id: string;
+  userId?: string;
+  fullName: string;
+  phone: string;
+  gender?: string;
+  title?: string;
+  avatar?: string;
+  areasOfFocus: string[];
+  experienceYears: number;
+  languages: string[];
+  rates: { chat: number; voice: number; video: number };
+  certificates?: string[];
+  rating: number;
+  reviewCount: number;
+  bio?: string;
+  availableSlots: string[];
+  approvalStatus?: string;
+  isVerified?: boolean;
+  isOnboardingComplete?: boolean;
+  hasFreeSessionOffer?: boolean;
+  freeSessionDurationText?: string;
+}
+
+export interface DashboardStats {
+  totalSessions: number;
+  completedSessions: number;
+  upcomingSessions: number;
+  /** Already formatted by the backend, e.g. "₹18,000" */
+  totalEarnings: string;
+  rating: number;
+  reviewCount: number;
+}
+
+export interface DashboardOverviewResponse {
+  success: boolean;
+  stats: DashboardStats;
+  upcomingBookings: BookingRecord[];
+}
 
 export interface SendCounsellorOtpRequest {
   phone: string;
@@ -88,7 +129,7 @@ export const counsellorApi = createApi({
       }),
       invalidatesTags: ['CounsellorProfile', 'Dashboard'],
     }),
-    getCounsellorProfile: builder.query<{ success: boolean; data: any }, string>({
+    getCounsellorProfile: builder.query<{ success: boolean; data: CounsellorProfile }, string>({
       query: (phone) => `/auth/profile/${phone}`,
       providesTags: ['CounsellorProfile'],
     }),
@@ -101,11 +142,11 @@ export const counsellorApi = createApi({
     }),
 
     // Dashboard Endpoints
-    getDashboardOverview: builder.query<{ success: boolean; stats: any; upcomingBookings: any[] }, string>({
+    getDashboardOverview: builder.query<DashboardOverviewResponse, string>({
       query: (phone) => `/dashboard/overview/${phone}`,
       providesTags: ['Dashboard'],
     }),
-    updateCounsellorSettings: builder.mutation<{ success: boolean; message: string; data: any }, UpdateSettingsRequest>({
+    updateCounsellorSettings: builder.mutation<{ success: boolean; message: string; data: CounsellorProfile }, UpdateSettingsRequest>({
       query: (body) => ({
         url: '/dashboard/settings',
         method: 'PUT',
@@ -115,7 +156,7 @@ export const counsellorApi = createApi({
     }),
 
     // Booking / video-call endpoints
-    getCounsellorBookingById: builder.query<{ success: boolean; data: any }, string>({
+    getCounsellorBookingById: builder.query<{ success: boolean; data: BookingRecord }, string>({
       query: (id) => `/bookings/${id}`,
       providesTags: (result, error, id) => [{ type: 'Booking', id }],
     }),

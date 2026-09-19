@@ -3,6 +3,10 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator }
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { Channel } from 'stream-chat';
 import { connectChatUser } from './streamChatClient';
+import { colors, fonts } from '../theme';
+import { px } from '../utils/responsive';
+import Avatar from '../components/Avatar';
+import Header from '../components/Header';
 
 interface ChatTokenData {
   apiKey: string;
@@ -14,6 +18,8 @@ interface ChatTokenData {
 interface ChatListScreenProps {
   chatToken?: ChatTokenData;
   navigation: any;
+  /** Shown as a back button when the list is pushed on a stack rather than a tab. */
+  onBackPress?: () => void;
 }
 
 function getOtherMember(channel: Channel, myUserId: string) {
@@ -22,7 +28,7 @@ function getOtherMember(channel: Channel, myUserId: string) {
   return other?.user;
 }
 
-export default function ChatListScreen({ chatToken, navigation }: ChatListScreenProps) {
+export default function ChatListScreen({ chatToken, navigation, onBackPress }: ChatListScreenProps) {
   const [channels, setChannels] = useState<Channel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,7 +59,7 @@ export default function ChatListScreen({ chatToken, navigation }: ChatListScreen
   if (!chatToken || (loading && channels.length === 0 && !error)) {
     return (
       <SafeAreaView style={styles.centered}>
-        <ActivityIndicator color="#0F9D8C" />
+        <ActivityIndicator color={colors.primary} />
       </SafeAreaView>
     );
   }
@@ -72,7 +78,11 @@ export default function ChatListScreen({ chatToken, navigation }: ChatListScreen
   return (
     <View style={styles.container}>
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
-        <Text style={styles.title}>Messages</Text>
+        {onBackPress ? (
+          <Header title="Messages" onBackPress={onBackPress} containerStyle={styles.header} titleStyle={styles.headerTitle} />
+        ) : (
+          <Text style={styles.title}>Messages</Text>
+        )}
         <FlatList
           data={channels}
           keyExtractor={(item) => item.cid}
@@ -95,10 +105,8 @@ export default function ChatListScreen({ chatToken, navigation }: ChatListScreen
                   })
                 }
               >
-                <View style={styles.avatar}>
-                  <Text style={styles.avatarText}>{(other?.name || '?').charAt(0).toUpperCase()}</Text>
-                </View>
-                <View style={{ flex: 1 }}>
+                <Avatar name={other?.name} size={px(48)} shape="round" badge={item.countUnread()} style={styles.avatar} />
+                <View style={styles.rowBody}>
                   <Text style={styles.name}>{other?.name || 'Conversation'}</Text>
                   <Text style={styles.preview} numberOfLines={1}>
                     {lastMessage?.text || 'Say hello 👋'}
@@ -114,40 +122,34 @@ export default function ChatListScreen({ chatToken, navigation }: ChatListScreen
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F9F8F5' },
-  centered: { flex: 1, backgroundColor: '#F9F8F5', alignItems: 'center', justifyContent: 'center' },
+  container: { flex: 1, backgroundColor: colors.background },
+  centered: { flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' },
   title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    paddingHorizontal: 20,
-    marginTop: 8,
-    marginBottom: 12,
+    fontSize: px(28),
+    fontFamily: fonts.sans.bold,
+    color: colors.black,
+    paddingHorizontal: px(20),
+    marginTop: px(8),
+    marginBottom: px(16),
   },
-  list: { paddingHorizontal: 20, paddingBottom: 30 },
-  emptyText: { color: '#7A7870', textAlign: 'center', marginTop: 40 },
-  retryButton: { marginTop: 16, paddingHorizontal: 20, paddingVertical: 10, backgroundColor: '#0F9D8C', borderRadius: 20 },
-  retryText: { color: '#fff', fontWeight: '600' },
+  header: { paddingHorizontal: px(20), marginBottom: px(8) },
+  headerTitle: { fontFamily: fonts.sans.bold, fontSize: px(22) },
+  list: { paddingHorizontal: px(20), paddingBottom: px(30) },
+  emptyText: { color: colors.textSecondary, fontFamily: fonts.sans.regular, textAlign: 'center', marginTop: px(40) },
+  retryButton: { marginTop: px(16), paddingHorizontal: px(20), paddingVertical: px(10), backgroundColor: colors.primary, borderRadius: px(20) },
+  retryText: { color: colors.white, fontFamily: fonts.sans.semiBold },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 16,
+    backgroundColor: colors.card,
+    borderRadius: px(24),
     borderWidth: 1,
-    borderColor: '#E5E2DB',
-    padding: 14,
-    marginBottom: 10,
+    borderColor: colors.border,
+    padding: px(16),
+    marginBottom: px(12),
   },
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#DCEFEC',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  avatarText: { fontWeight: '700', color: '#0F9D8C', fontSize: 16 },
-  name: { fontWeight: '700', fontSize: 15, color: '#1A1A1A', marginBottom: 2 },
-  preview: { fontSize: 13, color: '#7A7870' },
+  avatar: { marginRight: px(14) },
+  rowBody: { flex: 1 },
+  name: { fontFamily: fonts.sans.bold, fontSize: px(16), color: colors.black, marginBottom: px(2) },
+  preview: { fontSize: px(13), fontFamily: fonts.sans.regular, color: colors.textSecondary },
 });

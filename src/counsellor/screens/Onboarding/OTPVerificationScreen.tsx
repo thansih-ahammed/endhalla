@@ -34,7 +34,7 @@ export default function OTPVerificationScreen({ route, navigation }: any) {
         })
       );
       if (result.counsellor?.isOnboardingComplete) {
-        navigation.reset({ index: 0, routes: [{ name: 'CounsellorDashboard' }] });
+        navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
       } else {
         dispatch(setOnboardingPhone(phone));
         navigation.navigate('FullName', { phone });

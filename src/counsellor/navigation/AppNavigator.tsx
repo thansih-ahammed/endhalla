@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { View, ActivityIndicator } from "react-native";
 import { NavigationContainer, createNavigationContainerRef } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import DashboardScreen from "../screens/DashboardScreen";
 import LoginScreen from "../screens/Onboarding/LoginScreen";
 import PhoneInputScreen from "../screens/Onboarding/PhoneInputScreen";
 import OTPVerificationScreen from "../screens/Onboarding/OTPVerificationScreen";
@@ -13,12 +13,16 @@ import LanguagesScreen from "../screens/Onboarding/LanguagesScreen";
 import AreasOfFocusScreen from "../screens/Onboarding/AreasOfFocusScreen";
 import CertificatesScreen from "../screens/Onboarding/CertificatesScreen";
 import SuccessScreen from "../screens/Onboarding/SuccessScreen";
+import MainTabNavigator from "./MainTabNavigator";
+import SessionDetailScreen from "../screens/Sessions/SessionDetailScreen";
 import VideoCallScreen from "../../shared/videoCall/VideoCallScreen";
 import ChatScreen from "../../shared/chat/ChatScreen";
 import MessagesScreen from "../screens/Chat/MessagesScreen";
-import { useAppSelector } from "../../shared/store";
+import { useAppDispatch, useAppSelector } from "../../shared/store";
+import { restoreSession } from "../../shared/store/authSlice";
 import { usePushNotifications } from "../../shared/utils/usePushNotifications";
 import { useUpdateCounsellorPushTokenMutation, useLazyGetCounsellorChatTokenQuery } from "../../shared/store/api/counsellorApi";
+import { colors } from "../theme";
 
 const Stack = createNativeStackNavigator();
 export const navigationRef = createNavigationContainerRef<any>();
@@ -37,9 +41,16 @@ function navigateWhenReady(routeName: string, params?: object, attempt = 0) {
 }
 
 export default function AppNavigator() {
-  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const dispatch = useAppDispatch();
+  const { isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
   const [updatePushToken] = useUpdateCounsellorPushTokenMutation();
   const [fetchChatToken] = useLazyGetCounsellorChatTokenQuery();
+
+  // Restore the saved session so a signed-in counsellor lands on the tabs
+  // instead of the login screen after a cold start.
+  useEffect(() => {
+    dispatch(restoreSession());
+  }, [dispatch]);
 
   usePushNotifications({
     enabled: isAuthenticated,
@@ -47,16 +58,29 @@ export default function AppNavigator() {
     getChatToken: () => fetchChatToken().unwrap(),
     onNotificationTap: (data) => {
       if (data.type === 'booking' || data.type === 'payment' || data.type === 'counsellor_review') {
-        navigateWhenReady('CounsellorDashboard');
+        if (data.bookingId) navigateWhenReady('SessionDetail', { bookingId: data.bookingId });
+        else navigateWhenReady('Main', { screen: 'Home' });
       } else if (data.type === 'chat') {
         navigateWhenReady('Messages');
       }
     },
   });
 
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  // Onboarding and the main tabs live in one stack: OTP verification signs the
+  // counsellor in *before* the profile steps, so gating the stack on
+  // isAuthenticated alone would skip onboarding. The initial route just picks
+  // where a cold start lands; screens navigate/reset explicitly from there.
   return (
     <NavigationContainer ref={navigationRef}>
-      <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Login">
+      <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={isAuthenticated ? 'Main' : 'Login'}>
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="PhoneInput" component={PhoneInputScreen} />
         <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
@@ -69,7 +93,8 @@ export default function AppNavigator() {
         <Stack.Screen name="Certificates" component={CertificatesScreen} />
         <Stack.Screen name="Success" component={SuccessScreen} />
 
-        <Stack.Screen name="CounsellorDashboard" component={DashboardScreen} />
+        <Stack.Screen name="Main" component={MainTabNavigator} />
+        <Stack.Screen name="SessionDetail" component={SessionDetailScreen} />
         <Stack.Screen name="VideoCall" component={VideoCallScreen} options={{ presentation: 'fullScreenModal' }} />
         <Stack.Screen name="Messages" component={MessagesScreen} />
         <Stack.Screen name="ChatScreen" component={ChatScreen} />

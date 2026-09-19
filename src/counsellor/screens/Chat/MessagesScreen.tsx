@@ -4,5 +4,5 @@ import ChatListScreen from '../../../shared/chat/ChatListScreen';
 
 export default function MessagesScreen({ navigation }: any) {
   const { data } = useGetCounsellorChatTokenQuery();
-  return <ChatListScreen chatToken={data} navigation={navigation} />;
+  return <ChatListScreen chatToken={data} navigation={navigation} onBackPress={() => navigation.goBack()} />;
 }
