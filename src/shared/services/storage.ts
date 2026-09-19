@@ -25,7 +25,7 @@ try {
       memoryStore.set(key, String(value));
     },
     getString: (key: string) => memoryStore.get(key),
-    delete: (key: string) => {
+    remove: (key: string) => {
       memoryStore.delete(key);
     },
     contains: (key: string) => memoryStore.has(key),
@@ -109,7 +109,10 @@ export const StorageService = {
    * Delete item
    */
   remove(key: string): void {
-    (mmkvInstance as any).delete(key);
+    // react-native-mmkv v4 API is `remove`; older versions exposed `delete`.
+    const store = mmkvInstance as any;
+    if (typeof store.remove === 'function') store.remove(key);
+    else if (typeof store.delete === 'function') store.delete(key);
   },
 
   // --- Registered Users Registry ---
