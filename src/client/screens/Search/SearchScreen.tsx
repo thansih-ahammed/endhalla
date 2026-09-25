@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { px } from '../../../shared/utils/responsive';
@@ -12,7 +13,7 @@ import ClockIcon from '../../../shared/assets/icons/clock.svg';
 import PlayIcon from '../../../shared/assets/icons/play.svg';
 import StarIcon from '../../../shared/assets/icons/star.svg';
 
-import { useGetCounsellorsQuery, CounsellorItem } from '../../../shared/store/api/clientApi';
+import { useGetCounsellorsQuery, useGetCategoriesQuery, CounsellorItem } from '../../../shared/store/api/clientApi';
 import { CounsellorCardSkeleton } from '../../../shared/components/SkeletonCard';
 import { playAudio, stopAudio } from '../../../shared/utils/soundPlayer';
 
@@ -50,7 +51,25 @@ export default function SearchScreen({ navigation }: any) {
     }
   };
 
-  const filters = ['All', 'Free Session', 'Anxiety', 'Relationships', 'Family', 'Trauma'];
+  // A voice note keeps playing through a tab switch otherwise — the sound is
+  // module-level, so it outlives this screen losing focus.
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        stopAudio();
+        setPlayingId(null);
+      };
+    }, []),
+  );
+
+  // Chips come from GET /counsellors/categories. 'Free Session' isn't a
+  // category — it filters on hasFreeSessionOffer — so it's injected after
+  // 'All'. Falls back to the previous hardcoded list if the request fails.
+  const { data: categoriesData } = useGetCategoriesQuery();
+  const apiCategories: string[] = (categoriesData?.data || []).map((c: any) => c.title).filter(Boolean);
+  const filters = apiCategories.length
+    ? [apiCategories[0], 'Free Session', ...apiCategories.slice(1)]
+    : ['All', 'Free Session', 'Anxiety', 'Relationships', 'Family', 'Trauma'];
 
   const rawList: CounsellorItem[] = apiData?.data || [];
   const counsellors = rawList
@@ -146,7 +165,17 @@ export default function SearchScreen({ navigation }: any) {
             counsellors.map((counsellor: any, idx: number) => {
               const isPlaying = playingId === counsellor.id;
               return (
-                <View key={counsellor.id || idx} style={styles.counsellorCard}>
+                <TouchableOpacity
+                  key={counsellor.id || idx}
+                  style={styles.counsellorCard}
+                  activeOpacity={0.9}
+                  onPress={() =>
+                    navigation.navigate('CounsellorDetail', {
+                      counsellorId: counsellor.id,
+                      counsellor: counsellor.rawCounsellor,
+                    })
+                  }
+                >
                   {counsellor.hasFree ? (
                     <View style={styles.freeBadgeRow}>
                       <Text style={styles.freeBadgeText}>🎁 Free session offer</Text>
@@ -222,7 +251,7 @@ export default function SearchScreen({ navigation }: any) {
                   >
                     <Text style={styles.profileBtnText}>{counsellor.hasFree ? 'Accept & Pick a Slot' : 'View Profile & Book'}</Text>
                   </TouchableOpacity>
-                </View>
+                </TouchableOpacity>
               );
             })
           )}

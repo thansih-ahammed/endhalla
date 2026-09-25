@@ -16,6 +16,7 @@ import MyBookingsScreen from "../screens/Bookings/MyBookingsScreen";
 import BookingDetailScreen from "../screens/Bookings/BookingDetailScreen";
 import VideoCallScreen from "../../shared/videoCall/VideoCallScreen";
 import ChatScreen from "../../shared/chat/ChatScreen";
+import CounsellorDetailScreen from "../screens/Counsellor/CounsellorDetailScreen";
 
 import { useAppDispatch, useAppSelector } from "../../shared/store";
 import { restoreSession } from "../../shared/store/authSlice";
@@ -78,6 +79,7 @@ export default function AppNavigator() {
         {isAuthenticated ? (
           <>
             <Stack.Screen name="Main" component={MainTabNavigator} />
+            <Stack.Screen name="CounsellorDetail" component={CounsellorDetailScreen} />
             <Stack.Screen name="BookSession" component={BookSessionScreen} />
             <Stack.Screen name="BookingConfirmed" component={BookingConfirmedScreen} />
             <Stack.Screen name="MyBookings" component={MyBookingsScreen} />

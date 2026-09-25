@@ -9,6 +9,7 @@ import {
   useEndCallMutation,
   useLazyGetChatChannelQuery,
   useLazyGetChatTokenQuery,
+  useCancelBookingMutation,
 } from '../../../shared/store/api/clientApi';
 import JoinCallButton from '../../../shared/videoCall/JoinCallButton';
 import { useAppAlert } from '../../../shared/components/AlertProvider';
@@ -29,7 +30,29 @@ export default function BookingDetailScreen({ route, navigation }: any) {
   const [fetchChatChannel] = useLazyGetChatChannelQuery();
   const [fetchChatToken] = useLazyGetChatTokenQuery();
   const [isMessaging, setIsMessaging] = useState(false);
-  const { showAlert } = useAppAlert();
+  const [cancelBooking, { isLoading: isCancelling }] = useCancelBookingMutation();
+  const { showAlert, confirm } = useAppAlert();
+
+  const handleCancel = async () => {
+    const ok = await confirm({
+      title: 'Cancel this booking?',
+      message: 'This frees the slot and cannot be undone — you would need to book again.',
+      confirmText: 'Cancel booking',
+      cancelText: 'Keep booking',
+      destructive: true,
+    });
+    if (!ok) return;
+    try {
+      await cancelBooking(bookingId).unwrap();
+      navigation.goBack();
+    } catch (err: any) {
+      showAlert({
+        title: 'Could not cancel',
+        message: err?.data?.message || 'Please try again.',
+        tone: 'error',
+      });
+    }
+  };
 
   const booking = data?.data;
 
@@ -118,6 +141,14 @@ export default function BookingDetailScreen({ route, navigation }: any) {
               </Text>
             </TouchableOpacity>
           )}
+
+          {booking.status === 'confirmed' && (
+            <TouchableOpacity style={styles.cancelButton} onPress={handleCancel} disabled={isCancelling}>
+              <Text style={styles.cancelButtonText}>
+                {isCancelling ? 'Cancelling...' : 'Cancel Booking'}
+              </Text>
+            </TouchableOpacity>
+          )}
         </ScrollView>
       </SafeAreaView>
     </View>
@@ -195,5 +226,19 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sans.medium,
     fontSize: px(14),
     color: colors.primary,
+  },
+  cancelButton: {
+    marginTop: px(12),
+    paddingVertical: px(14),
+    borderRadius: px(12),
+    borderWidth: 1,
+    borderColor: colors.dangerLight,
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: colors.danger,
+    fontFamily: fonts.sans.semiBold,
+    fontSize: px(14),
   },
 });

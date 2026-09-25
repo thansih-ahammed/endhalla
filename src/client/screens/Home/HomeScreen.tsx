@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Image, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
@@ -63,6 +64,17 @@ export default function HomeScreen({ navigation }: any) {
       );
     }
   };
+
+  // A voice note keeps playing through a tab switch otherwise — the sound is
+  // module-level, so it outlives this screen losing focus.
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        stopAudio();
+        setPlayingId(null);
+      };
+    }, []),
+  );
 
   const showSkeleton = isLoading || (isFetching && counsellors.length === 0);
 
@@ -185,7 +197,17 @@ export default function HomeScreen({ navigation }: any) {
               const audioDuration = counsellor.voiceNote?.duration || '0:38';
 
               return (
-                <View key={counsellor._id} style={styles.counsellorCard}>
+                <TouchableOpacity
+                  key={counsellor._id}
+                  style={styles.counsellorCard}
+                  activeOpacity={0.9}
+                  onPress={() =>
+                    navigation.navigate('CounsellorDetail', {
+                      counsellorId: counsellor._id,
+                      counsellor,
+                    })
+                  }
+                >
                   {/* Top Meta: Badge & Rating */}
                   <View style={styles.cardTopMeta}>
                     {counsellor.hasFreeSessionOffer ? (
@@ -283,7 +305,7 @@ export default function HomeScreen({ navigation }: any) {
                       <Text style={styles.declineBtnText}>Decline</Text>
                     </TouchableOpacity>
                   </View>
-                </View>
+                </TouchableOpacity>
               );
             })
           )}

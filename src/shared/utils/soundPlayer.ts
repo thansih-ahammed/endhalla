@@ -10,6 +10,10 @@ try {
 
 let activeSound: Sound | null = null;
 let currentPlayingUrl: string | null = null;
+// Bumped by every stop/play. A Sound that finishes loading with a stale token
+// was cancelled mid-load, so it must not start playing — otherwise tapping
+// play and immediately leaving the screen still fires the audio a moment later.
+let loadToken = 0;
 
 const resolveFullUrl = (rawUrl: string): string => {
   if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) {
@@ -33,6 +37,7 @@ export const playAudio = (
 ) => {
   stopAudio();
 
+  const myToken = ++loadToken;
   const fullUrl = resolveFullUrl(rawUrl);
   currentPlayingUrl = fullUrl;
   console.log('🎵 Initializing Sound instance for:', fullUrl);
@@ -44,6 +49,12 @@ export const playAudio = (
         currentPlayingUrl = null;
       }
       if (onError) onError(error);
+      return;
+    }
+
+    if (myToken !== loadToken) {
+      // Stopped (or superseded by another clip) while this one was loading.
+      sound.release();
       return;
     }
 
@@ -67,6 +78,7 @@ export const playAudio = (
 };
 
 export const stopAudio = () => {
+  loadToken++;
   if (activeSound) {
     try {
       activeSound.stop(() => {
