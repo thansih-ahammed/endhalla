@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Alert, PermissionsAndroid, Platform } from 'react-native';
+import { PermissionsAndroid, Platform } from 'react-native';
 import {
   getMessaging,
   requestPermission as requestMessagingPermission,
@@ -12,6 +12,7 @@ import {
 } from '@react-native-firebase/messaging';
 import notifee, { Event, EventType } from '@notifee/react-native';
 import { connectChatUser } from '../chat/streamChatClient';
+import { useAppAlert } from '../components/AlertProvider';
 import {
   displayIncomingCallNotification,
   clearIncomingCallNotifications,
@@ -59,6 +60,7 @@ export function usePushNotifications({
   onNotificationTap,
 }: UsePushNotificationsArgs) {
   const registeredRef = useRef(false);
+  const { showAlert } = useAppAlert();
 
   useEffect(() => {
     if (!enabled || registeredRef.current) return;
@@ -109,7 +111,7 @@ export function usePushNotifications({
 
       const title = remoteMessage.notification?.title || 'Endhalla';
       const body = remoteMessage.notification?.body || '';
-      if (body) Alert.alert(title, body);
+      if (body) showAlert({ title, message: body, tone: 'info' });
     });
 
     const unsubscribeOpened = onNotificationOpenedApp(messagingInstance, (remoteMessage) => {

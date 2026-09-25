@@ -42,15 +42,15 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     backgroundColor: colors.white,
-    borderRadius: px(28),
+    borderRadius: px(20),
     borderWidth: 1,
     borderColor: colors.border,
     padding: px(4),
   },
   segment: {
     flex: 1,
-    height: px(44),
-    borderRadius: px(24),
+    height: px(38),
+    borderRadius: px(16),
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontFamily: fonts.sans.medium,
-    fontSize: px(15),
+    fontSize: px(14),
     color: colors.textSecondary,
   },
   labelActive: {

@@ -75,12 +75,13 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sans.regular,
     fontSize: px(16),
     color: colors.textSecondary,
+    marginBottom: verticalScale(12),
   },
   privacyContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: px(8),
-    marginTop: verticalScale(16),
+    marginTop: verticalScale(12),
     backgroundColor: '#F5F8FF', // Light blue background for counsellor
     paddingHorizontal: px(16),
     paddingVertical: px(8),
@@ -88,13 +89,12 @@ const styles = StyleSheet.create({
   },
   privacyText: {
     color: colors.primary,
-    fontFamily: fonts.sans.medium,
+    fontFamily: fonts.sans.regular,
     fontSize: px(14),
   },
   buttonContainer: {
     gap: px(12),
     width: '100%',
-    paddingBottom: px(24),
   },
   agreeText: {
     fontFamily: fonts.sans.regular,

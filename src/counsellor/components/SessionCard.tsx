@@ -27,7 +27,7 @@ export default function SessionCard({ booking, highlight = false, showDay = fals
 
   const body = (
     <>
-      <Avatar name={name} size={px(64)} shape={highlight ? 'round' : 'square'} />
+      <Avatar name={name} size={px(48)} shape={highlight ? 'round' : 'square'} />
       <View style={styles.textCol}>
         <Text style={[styles.name, highlight && styles.nameLight]} numberOfLines={1}>
           {name}
@@ -86,10 +86,10 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: px(28),
-    paddingVertical: px(18),
-    paddingHorizontal: px(18),
-    marginBottom: px(14),
+    borderRadius: px(20),
+    paddingVertical: px(16),
+    paddingHorizontal: px(16),
+    marginBottom: px(12),
   },
   cardDefault: {
     backgroundColor: colors.card,
@@ -98,47 +98,47 @@ const styles = StyleSheet.create({
   },
   textCol: {
     flex: 1,
-    marginLeft: px(16),
+    marginLeft: px(12),
   },
   name: {
-    fontSize: px(18),
+    fontSize: px(16),
     fontFamily: fonts.sans.bold,
     color: colors.black,
-    marginBottom: px(4),
+    marginBottom: px(2),
   },
   nameLight: {
     color: colors.white,
   },
   subtitle: {
-    fontSize: px(14),
+    fontSize: px(13),
     fontFamily: fonts.sans.regular,
     color: colors.textSecondary,
-    lineHeight: px(20),
+    lineHeight: px(18),
   },
   subtitleLight: {
     color: 'rgba(255,255,255,0.85)',
   },
   right: {
-    marginLeft: px(10),
+    marginLeft: px(8),
   },
   nextUp: {
     backgroundColor: 'rgba(255,255,255,0.28)',
-    paddingHorizontal: px(16),
-    paddingVertical: px(10),
-    borderRadius: px(22),
+    paddingHorizontal: px(12),
+    paddingVertical: px(6),
+    borderRadius: px(12),
   },
   nextUpText: {
     color: colors.white,
     fontFamily: fonts.sans.semiBold,
-    fontSize: px(15),
+    fontSize: px(12),
   },
   statusPill: {
-    paddingHorizontal: px(14),
-    paddingVertical: px(8),
-    borderRadius: px(16),
+    paddingHorizontal: px(10),
+    paddingVertical: px(4),
+    borderRadius: px(12),
   },
   statusText: {
     fontFamily: fonts.sans.medium,
-    fontSize: px(14),
+    fontSize: px(12),
   },
 });

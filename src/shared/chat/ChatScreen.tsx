@@ -92,7 +92,7 @@ export default function ChatScreen({ route, navigation }: any) {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+      <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
             <Text style={styles.backText}>‹</Text>

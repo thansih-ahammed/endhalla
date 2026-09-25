@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: px(16),
-    paddingVertical: px(16),
+    paddingVertical: px(15),
   },
   left: {
     flexDirection: 'row',
@@ -74,27 +74,27 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   iconBox: {
-    width: px(22),
+    width: px(20),
     alignItems: 'center',
   },
   title: {
-    fontSize: px(15),
+    fontSize: px(14),
     fontFamily: fonts.sans.medium,
     color: colors.black,
   },
   right: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: px(8),
+    gap: px(6),
   },
   value: {
-    fontSize: px(14),
+    fontSize: px(13),
     fontFamily: fonts.sans.regular,
     color: colors.textSecondary,
   },
   divider: {
     height: 1,
     backgroundColor: colors.divider,
-    marginLeft: px(52),
+    marginLeft: px(50),
   },
 });

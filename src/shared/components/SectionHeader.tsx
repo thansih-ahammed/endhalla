@@ -38,26 +38,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: px(14),
+    marginBottom: px(12),
   },
   title: {
-    fontSize: px(18),
+    fontSize: px(16),
     fontFamily: fonts.sans.bold,
     color: colors.black,
   },
   action: {
-    fontSize: px(14),
+    fontSize: px(13),
     fontFamily: fonts.sans.medium,
     color: colors.primary,
   },
   groupLabelBox: {
-    marginBottom: px(10),
+    marginBottom: px(8),
     marginTop: px(4),
   },
   groupLabel: {
-    fontSize: px(12),
+    fontSize: px(11),
     fontFamily: fonts.sans.bold,
     color: '#8A8A8A',
-    letterSpacing: 0.8,
+    letterSpacing: 0.6,
   },
 });

@@ -104,19 +104,19 @@ export default function HomeScreen({ navigation }: any) {
               <Text style={styles.name}>{firstName} 👋</Text>
             </View>
             <TouchableOpacity style={styles.bellBtn} activeOpacity={0.7} onPress={() => navigation.navigate('Messages')}>
-              <BellIcon size={px(22)} color={colors.black} />
+              <BellIcon size={px(20)} color={colors.black} />
               {totalUnread > 0 ? <View style={styles.bellDot} /> : null}
             </TouchableOpacity>
           </View>
 
           {/* Stats */}
           <View style={styles.statsRow}>
-            <StatCard icon={<TrendingUpIcon size={px(22)} color={colors.primary} />} value={earningsText} label="This month" />
-            <StatCard icon={<CalendarIcon size={px(22)} color={colors.primary} />} value={String(stats?.totalSessions ?? 0)} label="Sessions" />
+            <StatCard icon={<TrendingUpIcon size={px(20)} color={colors.primary} />} value={earningsText} label="This month" />
+            <StatCard icon={<CalendarIcon size={px(20)} color={colors.primary} />} value={String(stats?.totalSessions ?? 0)} label="Sessions" />
             <StatCard
-              icon={<StarIcon size={px(22)} color={colors.star} />}
+              icon={<StarIcon size={px(20)} color={colors.star} />}
               value={String(stats?.rating ?? '—')}
-              valueSuffix={<StarIcon size={px(18)} color={colors.black} filled />}
+              valueSuffix={<StarIcon size={px(16)} color={colors.black} filled />}
               label="Rating"
             />
           </View>
@@ -126,8 +126,8 @@ export default function HomeScreen({ navigation }: any) {
 
           {overviewLoading ? (
             <>
-              <SkeletonItem height={px(100)} borderRadius={px(28)} style={styles.gap} />
-              <SkeletonItem height={px(100)} borderRadius={px(28)} style={styles.gap} />
+              <SkeletonItem height={px(80)} borderRadius={px(20)} style={styles.gap} />
+              <SkeletonItem height={px(80)} borderRadius={px(20)} style={styles.gap} />
             </>
           ) : todaySessions.length === 0 ? (
             <EmptyState title="No sessions today" subtitle="Confirmed bookings for today will show up here." style={styles.gap} />
@@ -146,7 +146,7 @@ export default function HomeScreen({ navigation }: any) {
           {/* Availability */}
           <View style={styles.availabilityCard}>
             <View style={styles.availabilityIcon}>
-              <ClockIcon size={px(24)} color={colors.primary} />
+              <ClockIcon size={px(20)} color={colors.primary} />
             </View>
             <View style={styles.flex}>
               <Text style={styles.cardTitle}>Your availability</Text>
@@ -163,8 +163,8 @@ export default function HomeScreen({ navigation }: any) {
           <SectionHeader title="Recent messages" actionLabel="See all" onActionPress={() => navigation.navigate('Messages')} />
           {chatsLoading && chats.length === 0 ? (
             <>
-              <SkeletonItem height={px(92)} borderRadius={px(28)} style={styles.gap} />
-              <SkeletonItem height={px(92)} borderRadius={px(28)} style={styles.gap} />
+              <SkeletonItem height={px(76)} borderRadius={px(20)} style={styles.gap} />
+              <SkeletonItem height={px(76)} borderRadius={px(20)} style={styles.gap} />
             </>
           ) : chats.length === 0 ? (
             <EmptyState title="No messages yet" subtitle="Conversations with your clients will appear here." style={styles.gap} />
@@ -176,7 +176,7 @@ export default function HomeScreen({ navigation }: any) {
                 activeOpacity={0.85}
                 onPress={() => navigation.navigate('ChatScreen', { channelId: c.channelId, chatToken, otherUserName: c.name })}
               >
-                <Avatar name={c.name} size={px(60)} shape="round" />
+                <Avatar name={c.name} size={px(48)} shape="round" />
                 <View style={styles.messageBody}>
                   <Text style={styles.cardTitle} numberOfLines={1}>
                     {c.name}
@@ -200,7 +200,7 @@ export default function HomeScreen({ navigation }: any) {
           {/* Reach new users */}
           <TouchableOpacity style={styles.reachCard} activeOpacity={0.85}>
             <View style={styles.reachIcon}>
-              <UsersIcon size={px(26)} color={colors.white} />
+              <UsersIcon size={px(22)} color={colors.white} />
             </View>
             <View style={styles.flex}>
               <Text style={styles.cardTitle}>Reach new users</Text>
@@ -247,23 +247,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: px(24),
+    marginBottom: px(20),
   },
   greeting: {
-    fontSize: px(15),
+    fontSize: px(13),
     fontFamily: fonts.sans.regular,
     color: colors.textSecondary,
     marginBottom: px(2),
   },
   name: {
-    fontSize: px(28),
+    fontSize: px(22),
     fontFamily: fonts.sans.bold,
     color: colors.black,
   },
   bellBtn: {
-    width: px(56),
-    height: px(56),
-    borderRadius: px(28),
+    width: px(40),
+    height: px(40),
+    borderRadius: px(20),
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.border,
@@ -272,80 +272,80 @@ const styles = StyleSheet.create({
   },
   bellDot: {
     position: 'absolute',
-    top: px(15),
-    right: px(16),
-    width: px(9),
-    height: px(9),
-    borderRadius: px(5),
+    top: px(10),
+    right: px(11),
+    width: px(8),
+    height: px(8),
+    borderRadius: px(4),
     backgroundColor: colors.primary,
     borderWidth: 1.5,
     borderColor: colors.white,
   },
   statsRow: {
     flexDirection: 'row',
-    gap: px(12),
-    marginBottom: px(28),
+    gap: px(10),
+    marginBottom: px(24),
   },
   gap: {
-    marginBottom: px(14),
+    marginBottom: px(12),
   },
   availabilityCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.card,
-    borderRadius: px(28),
+    borderRadius: px(20),
     borderWidth: 1,
     borderColor: colors.border,
-    padding: px(18),
-    marginTop: px(6),
-    marginBottom: px(28),
+    padding: px(16),
+    marginTop: px(4),
+    marginBottom: px(24),
   },
   availabilityIcon: {
-    width: px(64),
-    height: px(64),
-    borderRadius: px(32),
+    width: px(44),
+    height: px(44),
+    borderRadius: px(22),
     backgroundColor: colors.primaryLight,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: px(16),
+    marginRight: px(14),
   },
   cardTitle: {
-    fontSize: px(17),
+    fontSize: px(15),
     fontFamily: fonts.sans.bold,
     color: colors.black,
-    marginBottom: px(4),
+    marginBottom: px(2),
   },
   cardSubtitle: {
-    fontSize: px(14),
+    fontSize: px(13),
     fontFamily: fonts.sans.regular,
     color: colors.textSecondary,
-    lineHeight: px(20),
+    lineHeight: px(18),
   },
   managePill: {
     backgroundColor: colors.primaryLight,
-    paddingHorizontal: px(18),
-    paddingVertical: px(12),
-    borderRadius: px(22),
+    paddingHorizontal: px(14),
+    paddingVertical: px(8),
+    borderRadius: px(14),
     marginLeft: px(8),
   },
   managePillText: {
     color: colors.primary,
     fontFamily: fonts.sans.semiBold,
-    fontSize: px(15),
+    fontSize: px(13),
   },
   messageCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.card,
-    borderRadius: px(28),
+    borderRadius: px(20),
     borderWidth: 1,
     borderColor: colors.border,
-    padding: px(18),
-    marginBottom: px(14),
+    padding: px(16),
+    marginBottom: px(12),
   },
   messageBody: {
     flex: 1,
-    marginLeft: px(14),
+    marginLeft: px(12),
     marginRight: px(8),
   },
   messageMeta: {
@@ -353,15 +353,15 @@ const styles = StyleSheet.create({
     gap: px(6),
   },
   messageTime: {
-    fontSize: px(13),
+    fontSize: px(12),
     fontFamily: fonts.sans.regular,
     color: colors.textSecondary,
   },
   unreadBadge: {
-    minWidth: px(26),
-    height: px(26),
-    borderRadius: px(13),
-    paddingHorizontal: px(6),
+    minWidth: px(20),
+    height: px(20),
+    borderRadius: px(10),
+    paddingHorizontal: px(5),
     backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
@@ -369,47 +369,47 @@ const styles = StyleSheet.create({
   unreadText: {
     color: colors.white,
     fontFamily: fonts.sans.bold,
-    fontSize: px(13),
+    fontSize: px(11),
   },
   reachCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#E4E6FB',
-    borderRadius: px(24),
-    padding: px(20),
-    marginTop: px(12),
+    borderRadius: px(20),
+    padding: px(16),
+    marginTop: px(4),
     marginBottom: px(24),
   },
   reachIcon: {
-    width: px(56),
-    height: px(56),
-    borderRadius: px(28),
+    width: px(44),
+    height: px(44),
+    borderRadius: px(22),
     backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: px(16),
+    marginRight: px(14),
   },
   earningsCard: {
-    borderRadius: px(28),
-    padding: px(24),
+    borderRadius: px(20),
+    padding: px(20),
   },
   earningsLabel: {
-    fontSize: px(15),
+    fontSize: px(13),
     fontFamily: fonts.sans.regular,
     color: 'rgba(255,255,255,0.7)',
-    marginBottom: px(8),
+    marginBottom: px(6),
   },
   earningsValue: {
-    fontSize: px(32),
+    fontSize: px(26),
     fontFamily: fonts.sans.bold,
     color: colors.white,
-    marginBottom: px(8),
+    marginBottom: px(6),
   },
   earningsMeta: {
-    fontSize: px(14),
+    fontSize: px(13),
     fontFamily: fonts.sans.regular,
     color: 'rgba(255,255,255,0.7)',
-    marginBottom: px(20),
+    marginBottom: px(16),
   },
   earningsLink: {
     flexDirection: 'row',
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
     gap: px(6),
   },
   earningsLinkText: {
-    fontSize: px(15),
+    fontSize: px(14),
     fontFamily: fonts.sans.medium,
     color: colors.white,
   },

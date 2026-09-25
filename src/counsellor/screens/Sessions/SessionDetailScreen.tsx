@@ -57,7 +57,7 @@ export default function SessionDetailScreen({ route, navigation }: any) {
         {/* Client card */}
         <View style={styles.card}>
           <View style={styles.clientRow}>
-            <Avatar name={booking.clientName} size={px(64)} shape="round" />
+            <Avatar name={booking.clientName} size={px(52)} shape="round" />
             <View style={styles.clientInfo}>
               <Text style={styles.clientName} numberOfLines={1}>
                 {booking.clientName || 'Client'}
@@ -71,7 +71,7 @@ export default function SessionDetailScreen({ route, navigation }: any) {
 
           <View style={styles.infoRow}>
             <View style={styles.infoIcon}>
-              <CalendarIcon size={px(18)} color={colors.primary} />
+              <CalendarIcon size={px(16)} color={colors.primary} />
             </View>
             <View style={styles.flex}>
               <Text style={styles.infoLabel}>Date</Text>
@@ -82,7 +82,7 @@ export default function SessionDetailScreen({ route, navigation }: any) {
           </View>
           <View style={styles.infoRow}>
             <View style={styles.infoIcon}>
-              <ClockIcon size={px(18)} color={colors.primary} />
+              <ClockIcon size={px(16)} color={colors.primary} />
             </View>
             <View style={styles.flex}>
               <Text style={styles.infoLabel}>Time</Text>
@@ -93,7 +93,7 @@ export default function SessionDetailScreen({ route, navigation }: any) {
           </View>
           <View style={styles.infoRow}>
             <View style={styles.infoIcon}>
-              <TypeIcon size={px(18)} color={colors.primary} />
+              <TypeIcon size={px(16)} color={colors.primary} />
             </View>
             <View style={styles.flex}>
               <Text style={styles.infoLabel}>Type & fee</Text>
@@ -169,10 +169,10 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: colors.card,
-    borderRadius: px(24),
+    borderRadius: px(20),
     borderWidth: 1,
     borderColor: colors.border,
-    padding: px(20),
+    padding: px(18),
   },
   clientRow: {
     flexDirection: 'row',
@@ -180,58 +180,58 @@ const styles = StyleSheet.create({
   },
   clientInfo: {
     flex: 1,
-    marginHorizontal: px(14),
+    marginHorizontal: px(12),
   },
   clientName: {
-    fontSize: px(20),
+    fontSize: px(17),
     fontFamily: fonts.sans.bold,
     color: colors.black,
     marginBottom: px(2),
   },
   clientMeta: {
-    fontSize: px(14),
+    fontSize: px(13),
     fontFamily: fonts.sans.regular,
     color: colors.textSecondary,
   },
   divider: {
     height: 1,
     backgroundColor: colors.divider,
-    marginVertical: px(18),
+    marginVertical: px(16),
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: px(16),
+    marginBottom: px(14),
   },
   infoIcon: {
-    width: px(40),
-    height: px(40),
-    borderRadius: px(20),
+    width: px(36),
+    height: px(36),
+    borderRadius: px(18),
     backgroundColor: colors.primaryLight,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: px(14),
+    marginRight: px(12),
   },
   infoLabel: {
-    fontSize: px(13),
+    fontSize: px(12),
     fontFamily: fonts.sans.regular,
     color: colors.textSecondary,
     marginBottom: px(2),
   },
   infoValue: {
-    fontSize: px(15),
+    fontSize: px(14),
     fontFamily: fonts.sans.medium,
     color: colors.black,
   },
   notes: {
-    fontSize: px(15),
+    fontSize: px(14),
     fontFamily: fonts.sans.regular,
     color: colors.black,
-    lineHeight: px(22),
+    lineHeight: px(20),
     marginTop: px(4),
   },
   actions: {
-    marginTop: px(24),
+    marginTop: px(20),
     gap: px(12),
   },
 });

@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, Platform, Switch } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Platform, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 
@@ -12,6 +12,7 @@ import { compactRupees, parseRupees } from '../../../shared/utils/bookings';
 import { navigationRef } from '../../navigation/AppNavigator';
 
 import Avatar from '../../../shared/components/Avatar';
+import { useAppAlert } from '../../../shared/components/AlertProvider';
 import { StatPill } from '../../../shared/components/StatCard';
 import SettingsGroup, { SettingsRow } from '../../../shared/components/SettingsGroup';
 import { GroupLabel } from '../../../shared/components/SectionHeader';
@@ -31,6 +32,7 @@ export default function ProfileScreen({ navigation }: any) {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
   const phone = user?.phone || '';
+  const { showAlert, confirm } = useAppAlert();
 
   const { data: profileRes, refetch: refetchProfile } = useGetCounsellorProfileQuery(phone, { skip: !phone });
   const { data: overview, refetch: refetchOverview } = useGetDashboardOverviewQuery(phone, { skip: !phone });
@@ -59,33 +61,26 @@ export default function ProfileScreen({ navigation }: any) {
     }
   }, [dispatch, refetchProfile, refetchOverview]);
 
-  const handleLogout = () => {
-    Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Sign Out',
-          style: 'destructive',
-          onPress: () => {
-            dispatch(logout());
-            dispatch(logoutUser());
-            // The counsellor stack keeps onboarding and Main in one navigator, so
-            // send the root navigator back to Login explicitly.
-            if (navigationRef.isReady()) {
-              navigationRef.reset({ index: 0, routes: [{ name: 'Login' }] });
-            } else {
-              navigation.getParent()?.reset({ index: 0, routes: [{ name: 'Login' }] });
-            }
-          },
-        },
-      ],
-      { cancelable: true },
-    );
+  const handleLogout = async () => {
+    const ok = await confirm({
+      title: 'Sign out?',
+      message: 'You will need your phone number and an OTP to sign back in.',
+      confirmText: 'Sign Out',
+      destructive: true,
+    });
+    if (!ok) return;
+    dispatch(logout());
+    dispatch(logoutUser());
+    // The counsellor stack keeps onboarding and Main in one navigator, so
+    // send the root navigator back to Login explicitly.
+    if (navigationRef.isReady()) {
+      navigationRef.reset({ index: 0, routes: [{ name: 'Login' }] });
+    } else {
+      navigation.getParent()?.reset({ index: 0, routes: [{ name: 'Login' }] });
+    }
   };
 
-  const comingSoon = (feature: string) => () => Alert.alert(feature, 'This section is coming soon.');
+  const comingSoon = (feature: string) => () => showAlert({ title: feature, message: 'This section is coming soon.', tone: 'info' });
 
   return (
     <View style={styles.container}>
@@ -102,7 +97,7 @@ export default function ProfileScreen({ navigation }: any) {
           {/* Profile header card */}
           <View style={styles.profileCard}>
             <View style={styles.profileTop}>
-              <Avatar name={name} size={px(72)} />
+              <Avatar name={name} size={px(52)} />
               <View style={styles.profileInfo}>
                 <View style={styles.nameRow}>
                   <Text style={styles.nameText} numberOfLines={1}>
@@ -110,7 +105,7 @@ export default function ProfileScreen({ navigation }: any) {
                   </Text>
                   {profile?.isVerified ? (
                     <View style={styles.verifiedPill}>
-                      <CheckIcon size={px(12)} color={colors.primary} strokeWidth={3} />
+                      <CheckIcon size={px(10)} color={colors.primary} strokeWidth={3} />
                       <Text style={styles.verifiedText}>Verified</Text>
                     </View>
                   ) : null}
@@ -125,7 +120,7 @@ export default function ProfileScreen({ navigation }: any) {
               <StatPill value={String(stats?.totalSessions ?? 0)} label="Sessions" />
               <StatPill
                 value={String(stats?.rating ?? profile?.rating ?? '—')}
-                valueSuffix={<StarIcon size={px(16)} color={colors.black} filled />}
+                valueSuffix={<StarIcon size={px(14)} color={colors.black} filled />}
                 label="Rating"
               />
               <StatPill value={monthlyEarnings} label="This month" />
@@ -204,7 +199,7 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'ios' ? px(8) : px(16),
   },
   screenTitle: {
-    fontSize: px(28),
+    fontSize: px(26),
     fontFamily: fonts.sans.bold,
     color: colors.black,
     marginTop: px(4),
@@ -212,29 +207,29 @@ const styles = StyleSheet.create({
   },
   profileCard: {
     backgroundColor: colors.card,
-    borderRadius: px(24),
+    borderRadius: px(22),
     borderWidth: 1,
     borderColor: colors.border,
-    padding: px(20),
-    marginBottom: px(20),
+    padding: px(18),
+    marginBottom: px(16),
   },
   profileTop: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: px(20),
+    marginBottom: px(16),
   },
   profileInfo: {
     flex: 1,
-    marginLeft: px(16),
+    marginLeft: px(14),
   },
   nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: px(10),
-    marginBottom: px(4),
+    gap: px(8),
+    marginBottom: px(3),
   },
   nameText: {
-    fontSize: px(20),
+    fontSize: px(17),
     fontFamily: fonts.sans.bold,
     color: colors.black,
     flexShrink: 1,
@@ -244,40 +239,40 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: px(4),
     backgroundColor: colors.primaryLight,
-    paddingHorizontal: px(10),
-    paddingVertical: px(4),
-    borderRadius: px(12),
+    paddingHorizontal: px(8),
+    paddingVertical: px(3),
+    borderRadius: px(10),
   },
   verifiedText: {
-    fontSize: px(13),
+    fontSize: px(11),
     fontFamily: fonts.sans.medium,
     color: colors.primary,
   },
   metaText: {
-    fontSize: px(15),
+    fontSize: px(13),
     fontFamily: fonts.sans.regular,
     color: colors.textSecondary,
   },
   statsRow: {
     flexDirection: 'row',
-    gap: px(12),
+    gap: px(10),
   },
   availabilityBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: px(22),
-    paddingHorizontal: px(20),
-    paddingVertical: px(18),
-    marginBottom: px(28),
+    borderRadius: px(20),
+    paddingHorizontal: px(16),
+    paddingVertical: px(14),
+    marginBottom: px(24),
   },
   bannerTitle: {
-    fontSize: px(17),
+    fontSize: px(15),
     fontFamily: fonts.sans.bold,
     color: colors.white,
-    marginBottom: px(4),
+    marginBottom: px(2),
   },
   bannerSubtitle: {
-    fontSize: px(14),
+    fontSize: px(12),
     fontFamily: fonts.sans.regular,
     color: 'rgba(255,255,255,0.85)',
   },

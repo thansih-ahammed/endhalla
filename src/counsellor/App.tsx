@@ -1,8 +1,11 @@
 import React, { useEffect } from 'react';
+import { StatusBar } from 'react-native';
 import { Provider } from 'react-redux';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { store } from '../shared/store';
 import AppNavigator from './navigation/AppNavigator';
+import { AlertProvider } from '../shared/components/AlertProvider';
 import { setupNotificationChannels } from '../shared/utils/notificationChannels';
 
 export default function App() {
@@ -16,9 +19,17 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <Provider store={store}>
-        <AppNavigator />
-      </Provider>
+      {/* SafeAreaProvider must wrap everything: without it every SafeAreaView
+          and useSafeAreaInsets() reports zero insets, so content slides under
+          the status bar and the system navigation bar. */}
+      <SafeAreaProvider>
+        <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
+        <Provider store={store}>
+          <AlertProvider>
+            <AppNavigator />
+          </AlertProvider>
+        </Provider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }

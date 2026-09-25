@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     fontSize: px(24),
     fontFamily: fonts.sans.bold,
     color: '#1A1A1A',
-    marginBottom: px(8),
+    marginBottom: px(4),
   },
   subtitle: {
     fontSize: px(14),

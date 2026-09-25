@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Alert } from 'react-native';
 import {
   useLazyGetCounsellorCallTokenQuery,
   useEndCounsellorCallMutation,
@@ -7,6 +6,7 @@ import {
   useLazyGetCounsellorChatTokenQuery,
 } from '../../shared/store/api/counsellorApi';
 import { BookingRecord } from '../../shared/utils/bookings';
+import { useAppAlert } from '../../shared/components/AlertProvider';
 
 /**
  * Start/join a video call or open the chat for a booking. Shared by Home,
@@ -17,6 +17,7 @@ export function useSessionActions(navigation: any) {
   const [endCall] = useEndCounsellorCallMutation();
   const [fetchChatChannel] = useLazyGetCounsellorChatChannelQuery();
   const [fetchChatToken] = useLazyGetCounsellorChatTokenQuery();
+  const { showAlert } = useAppAlert();
   const [joiningId, setJoiningId] = useState<string | null>(null);
   const [messagingId, setMessagingId] = useState<string | null>(null);
 
@@ -35,7 +36,7 @@ export function useSessionActions(navigation: any) {
       const reason = err?.data?.reason;
       const message =
         reason === 'expired' ? 'This call has already ended.' : err?.data?.message || 'Could not join the call. Please try again.';
-      Alert.alert('Unable to join call', message);
+      showAlert({ title: 'Unable to join call', message, tone: 'error' });
     } finally {
       setJoiningId(null);
     }
@@ -51,7 +52,7 @@ export function useSessionActions(navigation: any) {
         otherUserName: booking.clientName,
       });
     } catch (err: any) {
-      Alert.alert('Unable to open chat', err?.data?.message || 'Please try again.');
+      showAlert({ title: 'Unable to open chat', message: err?.data?.message || 'Please try again.', tone: 'error' });
     } finally {
       setMessagingId(null);
     }

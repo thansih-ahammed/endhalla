@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Platform, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { addWeeks, eachDayOfInterval, endOfWeek, format, isSameDay, startOfWeek, subWeeks } from 'date-fns';
 
@@ -14,6 +14,7 @@ import {
 import { BookingRecord, upcomingFrom } from '../../../shared/utils/bookings';
 
 import SegmentedToggle from '../../../shared/components/SegmentedToggle';
+import { useAppAlert } from '../../../shared/components/AlertProvider';
 import EmptyState from '../../../shared/components/EmptyState';
 import { SkeletonItem } from '../../../shared/components/SkeletonCard';
 import { ChevronLeftIcon, ChevronRightIcon, CloseIcon, PlusIcon } from '../../../shared/components/Icons';
@@ -56,6 +57,7 @@ export default function ScheduleScreen({ navigation, route }: any) {
   } = useGetDashboardOverviewQuery(phone, { skip: !phone });
   const { data: profileRes, refetch: refetchProfile } = useGetCounsellorProfileQuery(phone, { skip: !phone });
   const [updateSettings, { isLoading: saving }] = useUpdateCounsellorSettingsMutation();
+  const { showAlert } = useAppAlert();
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -102,18 +104,25 @@ export default function ScheduleScreen({ navigation, route }: any) {
     });
   };
 
+  // Nothing to save until the counsellor actually toggles a slot.
+  const canSave = dirty && !saving;
+
   const saveAvailability = async () => {
     if (!phone) {
-      Alert.alert('Not signed in', 'We could not find your phone number. Please sign in again.');
+      showAlert({ title: 'Not signed in', message: 'We could not find your phone number. Please sign in again.', tone: 'error' });
       return;
     }
     const availableSlots = TIME_SLOTS.filter((s) => selectedSlots.has(normalizeSlot(s)));
     try {
       await updateSettings({ phone, availableSlots }).unwrap();
       setDirty(false);
-      Alert.alert('Availability saved', `${availableSlots.length} slot${availableSlots.length === 1 ? '' : 's'} open for booking.`);
+      showAlert({
+        title: 'Availability saved',
+        message: `${availableSlots.length} slot${availableSlots.length === 1 ? '' : 's'} open for booking.`,
+        tone: 'success',
+      });
     } catch (e: any) {
-      Alert.alert('Could not save', e?.data?.message || 'Please try again.');
+      showAlert({ title: 'Could not save', message: e?.data?.message || 'Please try again.', tone: 'error' });
     }
   };
 
@@ -132,11 +141,11 @@ export default function ScheduleScreen({ navigation, route }: any) {
             <Text style={styles.title}>Schedule</Text>
             <View style={styles.monthNav}>
               <TouchableOpacity style={styles.navBtn} activeOpacity={0.7} onPress={() => shiftWeek(-1)}>
-                <ChevronLeftIcon size={px(18)} color={colors.black} />
+                <ChevronLeftIcon size={px(16)} color={colors.black} />
               </TouchableOpacity>
               <Text style={styles.monthLabel}>{format(selectedDate, 'MMM yyyy')}</Text>
               <TouchableOpacity style={styles.navBtn} activeOpacity={0.7} onPress={() => shiftWeek(1)}>
-                <ChevronRightIcon size={px(18)} color={colors.black} />
+                <ChevronRightIcon size={px(16)} color={colors.black} />
               </TouchableOpacity>
             </View>
           </View>
@@ -164,9 +173,9 @@ export default function ScheduleScreen({ navigation, route }: any) {
           {tab === 'sessions' ? (
             overviewLoading ? (
               <>
-                <SkeletonItem height={px(110)} borderRadius={px(28)} style={styles.skeleton} />
-                <SkeletonItem height={px(110)} borderRadius={px(28)} style={styles.skeleton} />
-                <SkeletonItem height={px(110)} borderRadius={px(28)} style={styles.skeleton} />
+                <SkeletonItem height={px(80)} borderRadius={px(20)} style={styles.skeleton} />
+                <SkeletonItem height={px(80)} borderRadius={px(20)} style={styles.skeleton} />
+                <SkeletonItem height={px(80)} borderRadius={px(20)} style={styles.skeleton} />
               </>
             ) : sessions.length === 0 ? (
               <EmptyState title="No upcoming sessions" subtitle={`Nothing booked from ${format(selectedDate, 'EEE, d MMM')} onwards.`} />
@@ -196,20 +205,28 @@ export default function ScheduleScreen({ navigation, route }: any) {
                       onPress={() => toggleSlot(slot)}
                     >
                       <Text style={[styles.slotText, active && styles.slotTextActive]}>{slot}</Text>
-                      {active ? <CloseIcon size={px(16)} color={colors.primary} /> : null}
+                      {active ? <CloseIcon size={px(14)} color={colors.primary} /> : null}
                     </TouchableOpacity>
                   );
                 })}
               </View>
 
               <TouchableOpacity
-                style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
+                style={[styles.saveBtn, canSave ? styles.saveBtnActive : styles.saveBtnIdle]}
                 activeOpacity={0.8}
                 onPress={saveAvailability}
-                disabled={saving}
+                disabled={!canSave}
               >
-                <PlusIcon size={px(18)} color={colors.primary} />
-                <Text style={styles.saveBtnText}>{saving ? 'Saving…' : 'Save availability'}</Text>
+                {saving ? (
+                  <ActivityIndicator size="small" color={colors.white} />
+                ) : (
+                  <>
+                    <PlusIcon size={px(16)} color={canSave ? colors.white : colors.chevron} />
+                    <Text style={[styles.saveBtnText, canSave ? styles.saveBtnTextActive : styles.saveBtnTextIdle]}>
+                      {dirty ? `Save ${selectedSlots.size} slot${selectedSlots.size === 1 ? '' : 's'}` : 'Tap a slot to change availability'}
+                    </Text>
+                  </>
+                )}
               </TouchableOpacity>
             </>
           )}
@@ -237,22 +254,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: px(22),
+    marginBottom: px(20),
   },
   title: {
-    fontSize: px(28),
+    fontSize: px(26),
     fontFamily: fonts.sans.bold,
     color: colors.black,
   },
   monthNav: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: px(10),
+    gap: px(8),
   },
   navBtn: {
-    width: px(44),
-    height: px(44),
-    borderRadius: px(22),
+    width: px(36),
+    height: px(36),
+    borderRadius: px(18),
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.border,
@@ -260,34 +277,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   monthLabel: {
-    fontSize: px(17),
+    fontSize: px(15),
     fontFamily: fonts.sans.medium,
     color: colors.black,
-    minWidth: px(74),
+    minWidth: px(68),
     textAlign: 'center',
   },
   weekRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: px(20),
+    marginBottom: px(16),
   },
   dayCell: {
-    width: px(42),
-    paddingVertical: px(14),
-    borderRadius: px(21),
+    width: px(40),
+    paddingVertical: px(10),
+    borderRadius: px(20),
     alignItems: 'center',
   },
   dayCellActive: {
     backgroundColor: colors.primary,
   },
   dayName: {
-    fontSize: px(14),
+    fontSize: px(12),
     fontFamily: fonts.sans.regular,
     color: colors.textSecondary,
-    marginBottom: px(6),
+    marginBottom: px(4),
   },
   dayNum: {
-    fontSize: px(18),
+    fontSize: px(16),
     fontFamily: fonts.sans.semiBold,
     color: colors.black,
   },
@@ -295,36 +312,36 @@ const styles = StyleSheet.create({
     color: colors.white,
   },
   toggle: {
-    marginBottom: px(24),
+    marginBottom: px(20),
   },
   skeleton: {
-    marginBottom: px(14),
+    marginBottom: px(12),
   },
   hint: {
-    fontSize: px(15),
+    fontSize: px(13),
     fontFamily: fonts.sans.regular,
     color: colors.textSecondary,
-    lineHeight: px(22),
-    marginBottom: px(18),
+    lineHeight: px(20),
+    marginBottom: px(16),
   },
   slotGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    rowGap: px(12),
-    marginBottom: px(24),
+    rowGap: px(10),
+    marginBottom: px(20),
   },
   slot: {
     width: '48%',
-    height: px(64),
-    borderRadius: px(20),
+    height: px(52),
+    borderRadius: px(16),
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.border,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: px(20),
+    paddingHorizontal: px(16),
   },
   slotActive: {
     backgroundColor: colors.primaryLight,
@@ -332,7 +349,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   slotText: {
-    fontSize: px(16),
+    fontSize: px(14),
     fontFamily: fonts.sans.regular,
     color: colors.black,
   },
@@ -341,21 +358,29 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sans.medium,
   },
   saveBtn: {
-    height: px(64),
-    borderRadius: px(22),
-    borderWidth: 1.5,
-    borderStyle: 'dashed',
-    borderColor: colors.primary,
+    height: px(52),
+    borderRadius: px(16),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: px(10),
+    gap: px(8),
   },
-  saveBtnDisabled: {
-    opacity: 0.6,
+  saveBtnActive: {
+    backgroundColor: colors.primary,
+  },
+  saveBtnIdle: {
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: colors.border,
+  },
+  saveBtnTextActive: {
+    color: colors.white,
+  },
+  saveBtnTextIdle: {
+    color: colors.chevron,
   },
   saveBtnText: {
-    fontSize: px(17),
+    fontSize: px(15),
     fontFamily: fonts.sans.medium,
     color: colors.primary,
   },

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { px } from '../../../shared/utils/responsive';
@@ -7,6 +7,7 @@ import { colors, fonts } from '../../theme';
 import { useAppDispatch, useAppSelector } from '../../../shared/store';
 import { logoutUser, logout, restoreSession } from '../../../shared/store/authSlice';
 import { loadBookingsFromStorage } from '../../../shared/store/bookingSlice';
+import { useAppAlert } from '../../../shared/components/AlertProvider';
 
 // --- SVG ICONS MATCHING DESIGN ---
 const ChevronRight = ({ color = '#C2C0B8', size = 16 }: { color?: string; size?: number }) => (
@@ -96,6 +97,7 @@ export default function ProfileScreen({ navigation }: any) {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
   const [refreshing, setRefreshing] = useState(false);
+  const { confirm } = useAppAlert();
 
   const userName = user?.name || 'Sara Ahmed';
   const memberSince = 'Member since June 2026';
@@ -112,23 +114,16 @@ export default function ProfileScreen({ navigation }: any) {
     }
   }, [dispatch]);
 
-  const handleLogout = () => {
-    Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Sign Out',
-          style: 'destructive',
-          onPress: () => {
-            dispatch(logout());
-            dispatch(logoutUser());
-          },
-        },
-      ],
-      { cancelable: true }
-    );
+  const handleLogout = async () => {
+    const ok = await confirm({
+      title: 'Sign out?',
+      message: 'You will need your phone number and an OTP to sign back in.',
+      confirmText: 'Sign Out',
+      destructive: true,
+    });
+    if (!ok) return;
+    dispatch(logout());
+    dispatch(logoutUser());
   };
 
   return (

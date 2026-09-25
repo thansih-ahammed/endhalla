@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     marginBottom: px(32),
   },
   title: {
-    fontSize: px(32),
+    fontSize: px(28),
     fontFamily: fonts.serif.regular,
     color: colors.text,
     marginBottom: px(9),

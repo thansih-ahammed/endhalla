@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { px } from '../../../shared/utils/responsive';
 import { colors, fonts } from '../../theme';
@@ -11,6 +11,7 @@ import {
   useLazyGetChatTokenQuery,
 } from '../../../shared/store/api/clientApi';
 import JoinCallButton from '../../../shared/videoCall/JoinCallButton';
+import { useAppAlert } from '../../../shared/components/AlertProvider';
 
 export default function BookingDetailScreen({ route, navigation }: any) {
   const { bookingId } = route.params;
@@ -28,6 +29,7 @@ export default function BookingDetailScreen({ route, navigation }: any) {
   const [fetchChatChannel] = useLazyGetChatChannelQuery();
   const [fetchChatToken] = useLazyGetChatTokenQuery();
   const [isMessaging, setIsMessaging] = useState(false);
+  const { showAlert } = useAppAlert();
 
   const booking = data?.data;
 
@@ -44,7 +46,7 @@ export default function BookingDetailScreen({ route, navigation }: any) {
         otherUserName: booking.counsellorName,
       });
     } catch (err: any) {
-      Alert.alert('Unable to open chat', err?.data?.message || 'Please try again.');
+      showAlert({ title: 'Unable to open chat', message: err?.data?.message || 'Please try again.', tone: 'error' });
     } finally {
       setIsMessaging(false);
     }
@@ -68,7 +70,7 @@ export default function BookingDetailScreen({ route, navigation }: any) {
           : reason === 'expired'
           ? 'This call has already ended.'
           : err?.data?.message || 'Could not join the call. Please try again.';
-      Alert.alert('Unable to join call', message);
+      showAlert({ title: 'Unable to join call', message, tone: 'error' });
     }
   };
 

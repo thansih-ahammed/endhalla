@@ -139,7 +139,7 @@ export default function ClientsScreen({ navigation, route }: any) {
             returnKeyType="search"
             leftElement={
               <View style={styles.searchIcon}>
-                <SearchIcon size={px(20)} color="#9D9D9D" />
+                <SearchIcon size={px(18)} color="#9D9D9D" />
               </View>
             }
             inputContainerStyle={styles.searchBox}
@@ -150,8 +150,8 @@ export default function ClientsScreen({ navigation, route }: any) {
 
           {isLoading ? (
             <>
-              <SkeletonItem height={px(150)} borderRadius={px(28)} style={styles.skeleton} />
-              <SkeletonItem height={px(150)} borderRadius={px(28)} style={styles.skeleton} />
+              <SkeletonItem height={px(110)} borderRadius={px(20)} style={styles.skeleton} />
+              <SkeletonItem height={px(110)} borderRadius={px(20)} style={styles.skeleton} />
             </>
           ) : tab === 'active' ? (
             activeClients.length === 0 ? (
@@ -162,7 +162,7 @@ export default function ClientsScreen({ navigation, route }: any) {
             ) : (
               activeClients.map((c) => (
                 <TouchableOpacity key={c.key} style={styles.card} activeOpacity={0.85} onPress={() => openSession(c.nextSession)}>
-                  <Avatar name={c.name} size={px(68)} badge={c.unread} />
+                  <Avatar name={c.name} size={px(52)} badge={c.unread} />
                   <View style={styles.cardBody}>
                     <View style={styles.cardTopRow}>
                       <Text style={styles.cardName} numberOfLines={1}>
@@ -174,7 +174,7 @@ export default function ClientsScreen({ navigation, route }: any) {
                       {c.preview}
                     </Text>
                     <View style={styles.nextRow}>
-                      <ClockIcon size={px(14)} color={colors.primary} />
+                      <ClockIcon size={px(13)} color={colors.primary} />
                       <Text style={styles.nextText}>
                         {relativeDayLabel(c.nextSession)}, {c.nextSession.timeText}
                       </Text>
@@ -192,7 +192,7 @@ export default function ClientsScreen({ navigation, route }: any) {
             history.map((b) => (
               <TouchableOpacity key={b._id} style={styles.historyCard} activeOpacity={0.85} onPress={() => openSession(b)}>
                 <View style={styles.historyTopRow}>
-                  <Avatar name={b.clientName} size={px(48)} shape="round" />
+                  <Avatar name={b.clientName} size={px(44)} shape="round" />
                   <View style={styles.historyText}>
                     <Text style={styles.historyName} numberOfLines={1}>
                       {b.clientName || 'Client'} · {b.sessionType}
@@ -204,7 +204,7 @@ export default function ClientsScreen({ navigation, route }: any) {
                   <StatusPill status={b.status} />
                 </View>
                 <View style={styles.durationRow}>
-                  <ClockIcon size={px(14)} color={colors.textSecondary} />
+                  <ClockIcon size={px(13)} color={colors.textSecondary} />
                   <Text style={styles.durationText}>{SESSION_DURATION_MIN} min</Text>
                 </View>
               </TouchableOpacity>
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'ios' ? px(8) : px(16),
   },
   title: {
-    fontSize: px(28),
+    fontSize: px(26),
     fontFamily: fonts.sans.bold,
     color: colors.black,
     marginBottom: px(20),
@@ -243,55 +243,55 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.border,
-    height: px(60),
-    borderRadius: px(20),
+    height: px(52),
+    borderRadius: px(16),
   },
   searchIcon: {
     marginRight: px(10),
   },
   toggle: {
-    marginBottom: px(24),
+    marginBottom: px(20),
   },
   skeleton: {
-    marginBottom: px(14),
+    marginBottom: px(12),
   },
   // Active client card
   card: {
     flexDirection: 'row',
     backgroundColor: colors.card,
-    borderRadius: px(28),
+    borderRadius: px(20),
     borderWidth: 1,
     borderColor: colors.border,
-    padding: px(18),
-    marginBottom: px(14),
+    padding: px(16),
+    marginBottom: px(12),
   },
   cardBody: {
     flex: 1,
-    marginLeft: px(14),
+    marginLeft: px(12),
   },
   cardTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: px(4),
+    marginBottom: px(2),
   },
   cardName: {
-    fontSize: px(17),
+    fontSize: px(16),
     fontFamily: fonts.sans.bold,
     color: colors.black,
     flexShrink: 1,
     marginRight: px(8),
   },
   cardMeta: {
-    fontSize: px(13),
+    fontSize: px(12),
     fontFamily: fonts.sans.regular,
     color: colors.textSecondary,
   },
   cardPreview: {
-    fontSize: px(14),
+    fontSize: px(13),
     fontFamily: fonts.sans.regular,
     color: colors.textSecondary,
-    marginBottom: px(8),
+    marginBottom: px(6),
   },
   nextRow: {
     flexDirection: 'row',
@@ -299,18 +299,18 @@ const styles = StyleSheet.create({
     gap: px(6),
   },
   nextText: {
-    fontSize: px(14),
+    fontSize: px(13),
     fontFamily: fonts.sans.medium,
     color: colors.primary,
   },
   // History card
   historyCard: {
     backgroundColor: colors.card,
-    borderRadius: px(28),
+    borderRadius: px(20),
     borderWidth: 1,
     borderColor: colors.border,
-    padding: px(18),
-    marginBottom: px(14),
+    padding: px(16),
+    marginBottom: px(12),
   },
   historyTopRow: {
     flexDirection: 'row',
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     marginHorizontal: px(12),
   },
   historyName: {
-    fontSize: px(16),
+    fontSize: px(15),
     fontFamily: fonts.sans.bold,
     color: colors.black,
     marginBottom: px(2),
@@ -335,10 +335,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: px(6),
-    marginTop: px(12),
+    marginTop: px(10),
   },
   durationText: {
-    fontSize: px(14),
+    fontSize: px(13),
     fontFamily: fonts.sans.regular,
     color: colors.textSecondary,
   },

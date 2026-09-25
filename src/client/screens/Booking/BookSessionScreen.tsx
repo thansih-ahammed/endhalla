@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Modal, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Modal, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { format, isSameDay, parseISO, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
 import { Calendar } from 'react-native-calendars';
 import { px } from '../../../shared/utils/responsive';
 import { colors, fonts, borderRadius } from '../../theme';
 import Header from '../../../shared/components/Header';
+import { useAppAlert } from '../../../shared/components/AlertProvider';
 import { useAppDispatch, useAppSelector } from '../../../shared/store';
 import { setSessionType as setReduxSessionType, confirmBooking } from '../../../shared/store/bookingSlice';
 
@@ -23,6 +24,7 @@ import {
 
 export default function BookSessionScreen({ route, navigation }: any) {
   const dispatch = useAppDispatch();
+  const { showAlert } = useAppAlert();
   const [createBookingMutation] = useCreateBookingMutation();
   const [createRazorpayOrderMutation] = useCreateRazorpayOrderMutation();
   const [verifyRazorpayPaymentMutation] = useVerifyRazorpayPaymentMutation();
@@ -109,10 +111,11 @@ export default function BookSessionScreen({ route, navigation }: any) {
   const handleConfirm = async () => {
     // Validate slot availability
     if (isSlotBooked(selectedTime)) {
-      Alert.alert(
-        'Slot Unavailable',
-        `The slot ${selectedTime} on ${selectedDateItem.fullDateText} is already booked for ${counsellorName}. Please choose another available slot.`
-      );
+      showAlert({
+        title: 'Slot unavailable',
+        message: `${selectedTime} on ${selectedDateItem.fullDateText} is already booked for ${counsellorName}. Please choose another slot.`,
+        tone: 'warning',
+      });
       return;
     }
 
@@ -131,7 +134,7 @@ export default function BookSessionScreen({ route, navigation }: any) {
           price: displayPrice,
         }).unwrap();
       } catch (e: any) {
-        Alert.alert('Unable to book', e?.data?.message || 'Please try again.');
+        showAlert({ title: 'Unable to book', message: e?.data?.message || 'Please try again.', tone: 'error' });
         return;
       }
       dispatch(
@@ -172,7 +175,7 @@ export default function BookSessionScreen({ route, navigation }: any) {
         });
         setShowRazorpayModal(true);
       } else {
-        Alert.alert('Payment Error', 'Unable to initiate Razorpay order. Please try again.');
+        showAlert({ title: 'Payment error', message: 'Unable to initiate the payment. Please try again.', tone: 'error' });
       }
     } catch (err: any) {
       console.error('Error creating Razorpay order:', err);
@@ -235,7 +238,7 @@ export default function BookSessionScreen({ route, navigation }: any) {
       });
     } catch (e: any) {
       console.error('Razorpay payment verification error:', e);
-      Alert.alert('Payment Failed', e?.data?.message || 'Verification failed. Please try again.');
+      showAlert({ title: 'Payment failed', message: e?.data?.message || 'Verification failed. Please try again.', tone: 'error' });
     } finally {
       setIsProcessingPayment(false);
     }
