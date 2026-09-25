@@ -9,8 +9,15 @@ import {
   useCallStateHooks,
 } from '@stream-io/video-react-native-sdk';
 import { requestCallPermissions } from '../utils/mediaPermissions';
+import { colors, fonts, borderRadius } from '../theme';
+import { px } from '../utils/responsive';
 
 type PermissionState = 'checking' | 'granted' | 'denied';
+
+/** Full-bleed dark surface shared by every pre-call state. */
+function CallSurface({ children }: { children: React.ReactNode }) {
+  return <SafeAreaView style={styles.surface}>{children}</SafeAreaView>;
+}
 
 /**
  * Gates the call UI behind a "Calling…" waiting screen for the counsellor
@@ -34,16 +41,26 @@ function CallGate({
 
   if (isWaiting) {
     return (
-      <SafeAreaView style={styles.waitingContainer}>
-        <View style={styles.waitingAvatar}>
-          <Text style={styles.waitingAvatarText}>{(otherUserName || '?').charAt(0).toUpperCase()}</Text>
+      <CallSurface>
+        <View style={styles.waitingBody}>
+          <View style={styles.avatarRing}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>{(otherUserName || '?').charAt(0).toUpperCase()}</Text>
+            </View>
+          </View>
+          <Text style={styles.waitingTitle}>{otherUserName}</Text>
+          <View style={styles.statusPill}>
+            <ActivityIndicator size="small" color={colors.white} />
+            <Text style={styles.statusPillText}>Ringing…</Text>
+          </View>
         </View>
-        <Text style={styles.waitingTitle}>Calling {otherUserName}…</Text>
-        <Text style={styles.waitingSubtitle}>Waiting for them to join</Text>
-        <TouchableOpacity style={styles.endCallButton} onPress={onHangup} activeOpacity={0.85}>
-          <Text style={styles.endCallButtonText}>End Call</Text>
-        </TouchableOpacity>
-      </SafeAreaView>
+        <View style={styles.waitingFooter}>
+          <TouchableOpacity style={styles.endCallButton} onPress={onHangup} activeOpacity={0.85}>
+            <Text style={styles.endCallButtonText}>End Call</Text>
+          </TouchableOpacity>
+          <Text style={styles.waitingHint}>Waiting for them to join</Text>
+        </View>
+      </CallSurface>
     );
   }
 
@@ -95,33 +112,42 @@ export default function VideoCallScreen({ route, navigation }: any) {
 
   if (permissionState === 'checking') {
     return (
-      <SafeAreaView style={styles.centered}>
-        <ActivityIndicator color="#fff" size="large" />
-      </SafeAreaView>
+      <CallSurface>
+        <View style={styles.centeredBody}>
+          <ActivityIndicator color={colors.white} size="large" />
+          <Text style={styles.connectingText}>Preparing your call…</Text>
+        </View>
+      </CallSurface>
     );
   }
 
   if (permissionState === 'denied') {
     return (
-      <SafeAreaView style={styles.centered}>
-        <Text style={styles.message}>
-          Camera and microphone access are required to join this call.
-        </Text>
-        <TouchableOpacity style={styles.settingsButton} onPress={() => Linking.openSettings()}>
-          <Text style={styles.settingsButtonText}>Open Settings</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.backButtonText}>Go back</Text>
-        </TouchableOpacity>
-      </SafeAreaView>
+      <CallSurface>
+        <View style={styles.centeredBody}>
+          <Text style={styles.deniedTitle}>Camera & microphone needed</Text>
+          <Text style={styles.deniedBody}>
+            Endhalla needs access to your camera and microphone to connect this session.
+          </Text>
+          <TouchableOpacity style={styles.primaryButton} onPress={() => Linking.openSettings()} activeOpacity={0.85}>
+            <Text style={styles.primaryButtonText}>Open Settings</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.ghostButton} onPress={() => navigation.goBack()} activeOpacity={0.7}>
+            <Text style={styles.ghostButtonText}>Go back</Text>
+          </TouchableOpacity>
+        </View>
+      </CallSurface>
     );
   }
 
   if (!client || !call) {
     return (
-      <SafeAreaView style={styles.centered}>
-        <ActivityIndicator color="#fff" size="large" />
-      </SafeAreaView>
+      <CallSurface>
+        <View style={styles.centeredBody}>
+          <ActivityIndicator color={colors.white} size="large" />
+          <Text style={styles.connectingText}>Connecting…</Text>
+        </View>
+      </CallSurface>
     );
   }
 
@@ -137,83 +163,98 @@ export default function VideoCallScreen({ route, navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
+  container: { flex: 1, backgroundColor: colors.dark },
+  // colors.dark is the app's own dark surface, so the client reads green-black
+  // and the counsellor blue-black without this file knowing which app it's in.
+  surface: { flex: 1, backgroundColor: colors.dark },
+
+  centeredBody: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: px(32) },
+  connectingText: {
+    marginTop: px(16),
+    color: colors.white,
+    fontFamily: fonts.sans.medium,
+    fontSize: px(15),
+    opacity: 0.8,
   },
-  centered: {
-    flex: 1,
-    backgroundColor: '#000',
+
+  waitingBody: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: px(32) },
+  avatarRing: {
+    padding: px(6),
+    borderRadius: borderRadius.full,
+    borderWidth: px(2),
+    borderColor: colors.primary,
+    marginBottom: px(24),
+  },
+  avatar: {
+    width: px(104),
+    height: px(104),
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
   },
-  message: {
-    color: '#fff',
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  settingsButton: {
-    backgroundColor: '#0F9D8C',
-    borderRadius: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    marginBottom: 12,
-  },
-  settingsButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  backButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-  },
-  backButtonText: {
-    color: '#9CA3AF',
-  },
-  waitingContainer: {
-    flex: 1,
-    backgroundColor: '#111',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  waitingAvatar: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: '#0F9D8C',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-  },
-  waitingAvatarText: {
-    color: '#fff',
-    fontSize: 36,
-    fontWeight: '700',
-  },
+  avatarText: { color: colors.white, fontSize: px(40), fontFamily: fonts.sans.bold },
   waitingTitle: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 8,
+    color: colors.white,
+    fontSize: px(24),
+    fontFamily: fonts.sans.bold,
     textAlign: 'center',
+    marginBottom: px(14),
   },
-  waitingSubtitle: {
-    color: '#9CA3AF',
-    fontSize: 14,
-    marginBottom: 48,
+  statusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: px(16),
+    paddingVertical: px(8),
+    borderRadius: borderRadius.full,
+    backgroundColor: 'rgba(255,255,255,0.12)',
   },
+  statusPillText: {
+    marginLeft: px(8),
+    color: colors.white,
+    fontFamily: fonts.sans.medium,
+    fontSize: px(14),
+  },
+
+  waitingFooter: { alignItems: 'center', paddingBottom: px(40) },
   endCallButton: {
-    backgroundColor: '#E11D48',
-    borderRadius: 32,
-    paddingVertical: 14,
-    paddingHorizontal: 40,
+    backgroundColor: colors.danger,
+    borderRadius: borderRadius.full,
+    paddingVertical: px(16),
+    paddingHorizontal: px(44),
   },
-  endCallButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
+  endCallButtonText: { color: colors.white, fontSize: px(16), fontFamily: fonts.sans.bold },
+  waitingHint: {
+    marginTop: px(14),
+    color: colors.white,
+    opacity: 0.55,
+    fontFamily: fonts.sans.regular,
+    fontSize: px(13),
   },
+
+  deniedTitle: {
+    color: colors.white,
+    fontSize: px(20),
+    fontFamily: fonts.sans.bold,
+    textAlign: 'center',
+    marginBottom: px(10),
+  },
+  deniedBody: {
+    color: colors.white,
+    opacity: 0.7,
+    fontSize: px(14),
+    fontFamily: fonts.sans.regular,
+    textAlign: 'center',
+    lineHeight: px(20),
+    marginBottom: px(28),
+  },
+  primaryButton: {
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.full,
+    paddingVertical: px(14),
+    paddingHorizontal: px(36),
+  },
+  primaryButtonText: { color: colors.white, fontSize: px(15), fontFamily: fonts.sans.semiBold },
+  ghostButton: { marginTop: px(14), paddingVertical: px(10), paddingHorizontal: px(20) },
+  ghostButtonText: { color: colors.white, opacity: 0.6, fontFamily: fonts.sans.medium, fontSize: px(14) },
 });
