@@ -14,5 +14,6 @@ router.patch('/:id/cancel', bookingController.cancelBooking);
 router.get('/:id/call-token', requireClientAuth, bookingController.getCallToken);
 router.post('/:id/call/end', requireClientAuth, bookingController.endCall);
 router.get('/:id/chat-channel', requireClientAuth, bookingController.getChatChannel);
+router.patch('/:id/reschedule', requireClientAuth, bookingController.rescheduleBookingAsClient);
 
 module.exports = router;

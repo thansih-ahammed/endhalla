@@ -31,6 +31,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    // How many free sessions this user is entitled to in total. Kept on the
+    // user (not hardcoded) so support/admin can grant extras. What's been
+    // *used* is always derived from their bookings — see utils/freeSessions.js
+    // — so the two can never drift apart.
+    freeSessionsAllowance: {
+      type: Number,
+      default: 2,
+    },
   },
   {
     timestamps: true,

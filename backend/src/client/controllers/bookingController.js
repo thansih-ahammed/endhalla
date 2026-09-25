@@ -4,6 +4,8 @@ const Counsellor = require('../../models/Counsellor');
 const User = require('../../models/User');
 const { mintCallToken, endCall: endCallForBooking, CallTokenError } = require('../../utils/callToken');
 const { provisionChatChannel } = require('../../utils/chatToken');
+const { getFreeSessionQuota, isFreeBookingRequest } = require('../../utils/freeSessions');
+const { rescheduleBooking, RescheduleError } = require('../../utils/reschedule');
 const { sendPushNotification } = require('../../utils/pushNotification');
 
 // Best-effort notification helpers — never let a lookup/send failure affect
@@ -92,9 +94,25 @@ exports.createBooking = async (req, res) => {
 
     // Lookup Client user ID if phone provided
     let clientId = null;
+    let clientUser = null;
     if (clientPhone) {
-      const user = await User.findOne({ phone: clientPhone });
-      if (user) clientId = user._id;
+      clientUser = await User.findOne({ phone: clientPhone });
+      if (clientUser) clientId = clientUser._id;
+    }
+
+    // The free-session cap used to live only in the app (MMKV), so clearing
+    // app data or reinstalling handed out unlimited free sessions. Enforce it
+    // here, where it can't be bypassed.
+    if (isFreeBookingRequest({ price }) && clientUser) {
+      const quota = await getFreeSessionQuota(clientUser);
+      if (quota.remaining <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: `You have used all ${quota.allowance} free sessions.`,
+          reason: 'free_quota_exhausted',
+          quota,
+        });
+      }
     }
 
     const booking = await Booking.create({
@@ -593,3 +611,72 @@ exports.getBookedSlots = async (req, res) => {
 };
 
 
+
+/**
+ * How many free sessions this client has left.
+ * GET /api/free-sessions
+ */
+exports.getFreeSessions = async (req, res) => {
+  try {
+    const quota = await getFreeSessionQuota(req.clientUser);
+    return res.status(200).json({ success: true, ...quota });
+  } catch (error) {
+    console.error('Error in getFreeSessions:', error);
+    return res.status(500).json({ success: false, message: 'Server error fetching free sessions', error: error.message });
+  }
+};
+
+/**
+ * Move a booked session to another slot. No payment — already settled.
+ * PATCH /api/bookings/:id/reschedule
+ */
+exports.rescheduleBookingAsClient = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { dateText, dateISO, timeText } = req.body;
+
+    const booking = await Booking.findById(id);
+    if (!booking) {
+      return res.status(404).json({ success: false, message: 'Booking not found' });
+    }
+
+    const isOwner = booking.clientId
+      ? String(booking.clientId) === String(req.clientUser._id)
+      : booking.clientPhone === req.clientUser.phone;
+    if (!isOwner) {
+      return res.status(403).json({ success: false, message: 'Not your booking' });
+    }
+
+    const { from } = await rescheduleBooking({ booking, dateText, dateISO, timeText, by: 'client' });
+
+    notifyCounsellorOfReschedule(booking, from);
+
+    return res.status(200).json({ success: true, message: 'Session rescheduled', data: booking });
+  } catch (error) {
+    if (error instanceof RescheduleError) {
+      return res.status(error.status).json({ success: false, message: error.message });
+    }
+    console.error('Error in rescheduleBookingAsClient:', error);
+    return res.status(500).json({ success: false, message: 'Server error rescheduling booking', error: error.message });
+  }
+};
+
+async function notifyCounsellorOfReschedule(booking, from) {
+  try {
+    let counsellor = booking.counsellorId ? await Counsellor.findById(booking.counsellorId) : null;
+    if (!counsellor) counsellor = await Counsellor.findOne({ fullName: booking.counsellorName });
+    if (!counsellor?.userId) return;
+
+    const counsellorUser = await User.findById(counsellor.userId);
+    if (!counsellorUser?.pushToken) return;
+
+    await sendPushNotification({
+      token: counsellorUser.pushToken,
+      title: 'Session rescheduled',
+      body: `${booking.clientName || 'A client'} moved the ${from.dateText} ${from.timeText} session to ${booking.dateText} at ${booking.timeText}.`,
+      data: { type: 'booking', bookingId: String(booking._id) },
+    });
+  } catch (error) {
+    console.error('Failed to notify counsellor of reschedule:', error.message);
+  }
+}

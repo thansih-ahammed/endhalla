@@ -7,6 +7,7 @@ const authRoutes = require('./routes/authRoutes');
 const counsellorRoutes = require('./routes/counsellorRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const freeSessionRoutes = require('./routes/freeSessionRoutes');
 
 const app = express();
 
@@ -39,6 +40,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/counsellors', counsellorRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/free-sessions', freeSessionRoutes);
 
 // 404 Handler
 app.use((req, res) => {

@@ -89,6 +89,27 @@ const bookingSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    rescheduleCount: {
+      type: Number,
+      default: 0,
+    },
+    lastRescheduledAt: {
+      type: Date,
+    },
+    // Every move is appended here so support can see how a session drifted,
+    // and so a "rescheduled twice already" policy can be added later without
+    // a migration.
+    rescheduleHistory: [
+      {
+        _id: false,
+        fromDateText: String,
+        fromTimeText: String,
+        toDateText: String,
+        toTimeText: String,
+        by: { type: String, enum: ['client', 'counsellor'] },
+        at: { type: Date, default: Date.now },
+      },
+    ],
   },
   {
     timestamps: true,
